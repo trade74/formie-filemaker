@@ -1,6 +1,23 @@
-{# @var plugin \craftyfm\craftformiefilemaker\FormieFilemaker #}
-{# @var settings \craftyfm\craftformiefilemaker\models\Settings #}
+{# @var plugin \craftyfm\filemaker\Plugin #}
+{# @var settings \craftyfm\filemaker\models\SettingsModel #}
 
 {% import '_includes/forms.twig' as forms %}
 
-{# ... #}
+{{ forms.textField({
+  first: true,
+  label: 'Filemaker Data API v2 Username',
+  name: 'user',
+  value: settings.user
+}) }}
+
+{{ forms.textField({
+  label: 'Filemaker Data API v2 Password',
+  name: 'pass',
+  value: settings.pass
+}) }}
+
+{{ forms.textField({
+  label: 'Filemaker Data API v2 Auth URL'|t('filemaker'),
+  name: 'authURL',
+  value: settings.authURL
+}) }}

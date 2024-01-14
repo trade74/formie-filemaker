@@ -1,0 +1,69 @@
+
+
+{% import '_includes/forms' as forms %}
+{% import 'verbb-base/_macros' as macros %}
+
+{% set instructions %}
+### Step 1. Connect to the {name} API
+1. Go to <a href="https://www.provider.com/" target="_blank">{name}</a> and login to your account.
+1. In the left-hand sidebar menu, click on **Settings**, then **API**.
+1. Copy the **API Key** from {name} and paste in the **API Key** field below.
+
+### Step 2. Test Connection
+1. Save this integration.
+1. Click on the **Refresh** button in the right-hand sidebar.
+{% endset %}
+
+<div class="fui-settings-block">
+  {{ instructions | t('formie', { name: integration.displayName() }) | md }}
+</div>
+
+{% if not craft.app.config.general.allowAdminChanges %}
+<span class="warning with-icon">
+        {{ 'Integration settings can only be editable on an environment with `allowAdminChanges` enabled.' | t('formie') | md(inlineOnly=true) }}
+    </span>
+{% endif %}
+
+{{ forms.autosuggestField({
+label: 'Webhoo URL' | t('formie'),
+instructions: 'Enter your {name} URL here.' | t('formie', { name: integration.displayName() }),
+name: 'webhook',
+required: true,
+suggestEnvVars: true,
+value: integration.settings.webhook?? '',
+warning: macros.configWarning('webhook', 'formie'),
+errors: integration.getErrors('webhook'),
+}) }}
+
+{{ forms.autosuggestField({
+label: 'Auth URL' | t('formie'),
+instructions: 'Enter your {name} URL here.' | t('formie', { name: integration.displayName() }),
+name: 'authUrl',
+required: true,
+suggestEnvVars: true,
+value: integration.settings.authUrl?? '',
+warning: macros.configWarning('authUrl', 'formie'),
+errors: integration.getErrors('authUrl'),
+}) }}
+
+{{ forms.autosuggestField({
+label: 'Username' | t('formie'),
+instructions: 'Enter username.' | t('formie', { name: integration.displayName() }),
+name: 'username',
+required: true,
+suggestEnvVars: true,
+value: integration.settings.username ?? '',
+warning: macros.configWarning('username', 'formie'),
+errors: integration.getErrors('username'),
+}) }}
+
+{{ forms.autosuggestField({
+label: 'Password' | t('formie'),
+instructions: 'Enter password.' | t('formie', { name: integration.displayName() }),
+name: 'password',
+required: true,
+suggestEnvVars: true,
+value: integration.settings.password?? '',
+warning: macros.configWarning('password', 'formie'),
+errors: integration.getErrors('password'),
+}) }}
