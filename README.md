@@ -28,4 +28,3 @@ composer require craftyfm/craft-formie-filemaker
 # tell Craft to install the plugin
 ./craft plugin/install formie-filemaker
 ```
-https://fm.x2network.net/fmi/data/v2/databases/ausdone/layouts/requests/records
