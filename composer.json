@@ -1,6 +1,6 @@
 {
     "name": "craftyfm/craft-formie-filemaker",
-    "description": "Send form data from Formie to Filemaker",
+    "description": "Send form data from Formie to Filemaker Data API v2 via a Webhook",
     "type": "craft-plugin",
     "license": "proprietary",
     "support": {
