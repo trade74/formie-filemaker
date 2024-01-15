@@ -2,28 +2,14 @@
 namespace craftyfm\craftformiefilemaker;
 
 use Craft;
-use craft\base\Event;
-use craft\helpers\App;
-use craft\helpers\ArrayHelper;
 use craft\helpers\Json;
-use craft\web\View;
 use GuzzleHttp\Client;
-use GuzzleHttp\Cookie\FileCookieJar;
 use Throwable;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
-use verbb\formie\events\ModifyWebhookPayloadEvent;
 use verbb\formie\Formie;
 use verbb\formie\base\Integration;
 use verbb\formie\base\Webhook;
-use verbb\formie\elements\Form;
 use verbb\formie\elements\Submission;
-use verbb\formie\integrations\webhooks\Zapier;
-use verbb\formie\models\IntegrationCollection;
-use verbb\formie\models\IntegrationField;
 use verbb\formie\models\IntegrationFormSettings;
-use yii\base\Exception;
 
 class WebhookFilemaker extends Webhook
 {
@@ -44,6 +30,8 @@ class WebhookFilemaker extends Webhook
     public ?string $username = null;
     public ?string $password = null;
     public ?string $token = null;
+    public ?int $length = null;
+
 
 
     // Public Methods
@@ -138,26 +126,28 @@ class WebhookFilemaker extends Webhook
             // Either construct the payload yourself manually or get Formie to do it
             $payload = $this->generatePayloadValues($submission);
 
-            /* $payload =  [
+            $body =  [
                  "fieldData" => [
-                     "webhook_payload" => $payload
+                     "webhook_payload" => json_encode($payload)
                  ]
-             ];*/
+             ];
 
-            //
-            // OR
-            //
+            $this->length = strlen(json_encode($body)) ;
 
-            /* $payload = [
-                 'id' => $submission->id,
-                 'title' => $submission->title,
+            $client = new Client();
 
-                 // Handle custom fields
-                 'email' => $submission->getFieldValue('emailAddress'),
-                 // ...
-             ];*/
+            $headers = [ 'headers' => [
+                    'Host' => 'fm.x2network.net',
+                    'Content-Type' => 'application/json',
+                    'Content-Length' => $this->length,
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer ' . $this->getAuthToken()
+                ],
+                'body' => json_encode($body)
+            ];
 
-            $response = $this->getClient()->request('POST', $this->getWebhookUrl($this->webhook, $submission), $payload);
+            $request = $client->post($this->webhook, $headers);
+
         } catch (Throwable $e) {
             // Save a different payload to logs
             Integration::error($this, Craft::t('formie', 'API error: “{message}” {file}:{line}. Payload: “{payload}”. Response: “{response}”', [
@@ -176,6 +166,8 @@ class WebhookFilemaker extends Webhook
         return true;
     }
 
+
+
     public function getClient(): Client
     {
         // We memoize the client for performance, in case we make multiple requests.
@@ -186,8 +178,12 @@ class WebhookFilemaker extends Webhook
         //get or set refreshed token
         $headers = [
             'headers' => [
+               // 'Connection' => 'keep-alive',
+                'Host' => 'fm.x2network.net',
                 'Content-Type' => 'application/json',
-                'Authorization' => $this->getAuthToken()
+                'Content-Length' => $this->length,
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->getAuthToken()
             ]
         ];
 
@@ -235,11 +231,11 @@ class WebhookFilemaker extends Webhook
                 } else {
                     return false;
                 }
-            }, 900);
+            }, 100);
 
             return $token;
         } catch (Throwable $e) {
-            // Save a different payload to logs
+            // Auth errors to log
             Integration::error($this, Craft::t('formie', 'API error: “{message}” {file}:{line}. AuthURL: “{authurl}”. Token: “{token}”', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
