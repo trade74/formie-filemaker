@@ -3,6 +3,7 @@ namespace craftyfm\craftformiefilemaker;
 
 use Craft;
 use craft\helpers\Json;
+use craft\helpers\UrlHelper;
 use GuzzleHttp\Client;
 use Throwable;
 use verbb\formie\Formie;
@@ -31,6 +32,7 @@ class WebhookFilemaker extends Webhook
     public ?string $password = null;
     public ?string $token = null;
     public ?int $length = null;
+    public ?string $host = null;
 
 
 
@@ -41,6 +43,14 @@ class WebhookFilemaker extends Webhook
     {
         return Craft::t('formie', 'Send your form content to any URL you provide.');
     }
+
+    public function getHost(): string
+    {
+        return preg_replace('#^https?://#', '', UrlHelper::hostInfo($this->webhook));
+    }
+
+
+
 
     public function defineRules(): array
     {
@@ -137,7 +147,7 @@ class WebhookFilemaker extends Webhook
             $client = new Client();
 
             $headers = [ 'headers' => [
-                    'Host' => 'fm.x2network.net',
+                    'Host' => $this->getHost(),
                     'Content-Type' => 'application/json',
                     'Content-Length' => $this->length,
                     'Accept' => 'application/json',
@@ -179,7 +189,7 @@ class WebhookFilemaker extends Webhook
         $headers = [
             'headers' => [
                // 'Connection' => 'keep-alive',
-                'Host' => 'fm.x2network.net',
+                'Host' => $this->getHost(),
                 'Content-Type' => 'application/json',
                 'Content-Length' => $this->length,
                 'Accept' => 'application/json',
@@ -213,7 +223,6 @@ class WebhookFilemaker extends Webhook
                     'headers' => [
                         'Content-Type' => 'application/json',
                         'Authorization' => $basicAuthString
-
                     ],
                     ['body' => ''],
                     'debug' => true,
@@ -248,5 +257,44 @@ class WebhookFilemaker extends Webhook
 
             return false;
         }
+    }
+
+    public function fetchConnection(): bool
+    {
+        try {
+            // Create a simple API call to `/account` to test the connection (in the integration settings)
+            // any errors will be safely caught, logged and shown in the UI.
+            //$response = $this->request('GET', $this->webhook);
+
+            $client = new Client();
+
+            $headers = [ 'headers' => [
+                'Host' => $this->getHost(),
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->getAuthToken()
+            ]
+            ];
+
+            $response = $client->get($this->webhook, $headers);
+
+            $json = $response->getBody()->getContents();
+            $data = json_decode($json);
+
+            $status = $data->messages[0]->message;
+
+            $webhook_payload = $data->response->data[0]->fieldData->webhook_payload;
+
+            if($status == "OK" && $webhook_payload != null){
+                return true;
+            }
+
+
+        } catch (Throwable $e) {
+            Integration::apiError($this, $e);
+
+            return false;
+        }
+
+        return true;
     }
 }
