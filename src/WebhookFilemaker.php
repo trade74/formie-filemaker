@@ -63,7 +63,7 @@ class WebhookFilemaker extends Webhook
 
     public function getIconUrl(): string
     {
-        return '';
+        return Craft::$app->getAssetManager()->getPublishedUrl("@craftyfm/craftformiefilemaker/icon.svg", true);
     }
 
     public function getSettingsHtml(): string
