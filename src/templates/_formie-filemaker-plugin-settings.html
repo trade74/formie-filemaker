@@ -4,14 +4,16 @@
 {% import 'verbb-base/_macros' as macros %}
 
 {% set instructions %}
-### Step 1. Connect to the {name} API
-1. Go to <a href="https://www.provider.com/" target="_blank">{name}</a> and login to your account.
-1. In the left-hand sidebar menu, click on **Settings**, then **API**.
-1. Copy the **API Key** from {name} and paste in the **API Key** field below.
+### Step 1. Setup on Filemaker side
+1. Setup a User with a privilege set that includes <code>fmrest</code>
+1. Ensure that user has access to the layout needed
+1. Add a text field to table and layout called <code>webhook_payload</code>, this is where the JSON will be sent to when creating a new record
+1. It is up to you to deal with that JSON in the webhook_payload and parse it out to the fields needed, via a Filemaker script.
 
-### Step 2. Test Connection
-1. Save this integration.
-1. Click on the **Refresh** button in the right-hand sidebar.
+### Step 2. Setup on Craft side
+1. Enter the layout URL for webhook_payload to be sent to. eg <code>https://fm.mydomain.com/fmi/data/v2/databases/mydatabse/layouts/mylayout/records</code>
+1. Enter the URL to get the session token eg <code>https://fm.mydomain.com/fmi/data/v2/databases/mydatabse/sessions</code>
+1. Enter your username and password of the user with <code>fmrest</code> privileges
 {% endset %}
 
 <div class="fui-settings-block">
@@ -25,7 +27,7 @@
 {% endif %}
 
 {{ forms.autosuggestField({
-label: 'Webhoo URL' | t('formie'),
+label: 'Layout URL - To send webhook payload to' | t('formie'),
 instructions: 'Enter your {name} URL here.' | t('formie', { name: integration.displayName() }),
 name: 'webhook',
 required: true,
@@ -36,7 +38,7 @@ errors: integration.getErrors('webhook'),
 }) }}
 
 {{ forms.autosuggestField({
-label: 'Auth URL' | t('formie'),
+label: 'Session token URL' | t('formie'),
 instructions: 'Enter your {name} URL here.' | t('formie', { name: integration.displayName() }),
 name: 'authUrl',
 required: true,
@@ -47,7 +49,7 @@ errors: integration.getErrors('authUrl'),
 }) }}
 
 {{ forms.autosuggestField({
-label: 'Username' | t('formie'),
+label: 'fmrest Username' | t('formie'),
 instructions: 'Enter username.' | t('formie', { name: integration.displayName() }),
 name: 'username',
 required: true,
@@ -58,7 +60,7 @@ errors: integration.getErrors('username'),
 }) }}
 
 {{ forms.autosuggestField({
-label: 'Password' | t('formie'),
+label: 'fmrest Password' | t('formie'),
 instructions: 'Enter password.' | t('formie', { name: integration.displayName() }),
 name: 'password',
 required: true,
