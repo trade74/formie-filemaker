@@ -28,3 +28,16 @@ composer require craftyfm/craft-formie-filemaker
 # tell Craft to install the plugin
 ./craft plugin/install formie-filemaker
 ```
+
+This plugin adds Filemaker to the Webhook settings in Formie.
+
+Send Formie submissions to Claris Filemaker via Data API v2.
+
+This plugin sends the form data to a field name ```webhook_payload``` on your Filemaker layout (add this field to the table & layout) via the Webhook Integration settings in ```Formie->Settings->Webhook```
+
+If you find any issues, please send a message via https://github.com/trade74/formie-filemaker/issues
+
+
+
+
+
