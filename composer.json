@@ -21,7 +21,7 @@
     },
     "extra": {
         "handle": "formie-filemaker",
-        "name": "formie-filemaker",
+        "name": "Formie Filemaker",
         "developer": "Craftyfm",
         "documentationUrl": "",
         "class": "craftyfm\\craftformiefilemaker\\FormieFilemaker"
