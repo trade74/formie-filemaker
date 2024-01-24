@@ -1,4 +1,4 @@
-# formie-filemaker
+# Formie Filemaker
 
 Send form data from Formie to Filemaker
 
